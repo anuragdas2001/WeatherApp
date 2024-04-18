@@ -1,27 +1,43 @@
-import { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
+interface WeatherData {
+  main?: {
+    temp: number;
+    temp_max: number;
+    temp_min: number;
+    humidity: number;
+  };
+  wind?: {
+    speed: number;
+  };
+  visibility?: number;
+  weather?: {
+    description: string;
+    icon: string;
+  }[];
+}
+
 export const Weather = () => {
-  const { cityname } = useParams();
-  const [weather, setWeather] = useState({});
+  const { cityname } = useParams<{ cityname: string }>();
+  const [weather, setWeather] = useState<WeatherData>({});
   const [unit, setUnit] = useState("celsius"); // Default unit is Celsius
-  const [temperature, setTemperature] = useState(null);
-  const [maxtemp, setMaxTemp] = useState(null);
-  const [mintemp, setMinTemp] = useState(null);
-  const [Wind, setWind] = useState(null);
-  const [Humidity, setHumidity] = useState(null);
-  const [Visibility, setVisibility] = useState(null);
-  const [description, setDescription] = useState(null);
-  const [icon,setIcon] = useState(null);
+  const [temperature, setTemperature] = useState<number | null>(null);
+  const [maxtemp, setMaxTemp] = useState<number | null>(null);
+  const [mintemp, setMinTemp] = useState<number | null>(null);
+  const [Wind, setWind] = useState<number | null>(null);
+  const [Humidity, setHumidity] = useState<number | null>(null);
+  const [Visibility, setVisibility] = useState<number | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
+  const [icon, setIcon] = useState<string | null>(null);
+
   const fetchWeather = async () => {
     try {
       const response = await axios.get(
         `http://api.openweathermap.org/data/2.5/weather?q=${cityname}&appid=0de316955c46fcadc8ceaeacfa51fdb4`
       );
       setWeather(response.data);
-
-      // console.log(response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -29,16 +45,16 @@ export const Weather = () => {
 
   useEffect(() => {
     fetchWeather();
-    setHumidity(weather.main ? weather.main.humidity : null);
-    setWind(weather.wind ? weather.wind.speed : null);
-    setVisibility(weather.main ? weather.visibility : null);
-    setDescription(weather.weather ? weather.weather[0].description : null);
-    setIcon(weather.weather ? weather.weather[0].icon : null);
-  }, [cityname, weather]);
+  }, [cityname]);
 
   useEffect(() => {
-    // Convert temperature when weather data changes or unit changes
     if (weather.main) {
+      setHumidity(weather.main.humidity);
+      setWind(weather.wind ? weather.wind.speed : null);
+      setVisibility(weather.visibility || null);
+      setDescription(weather.weather ? weather.weather[0].description : null);
+      setIcon(weather.weather ? weather.weather[0].icon : null);
+
       if (unit === "celsius") {
         setTemperature(((weather.main.temp - 32) * 5) / 9); // Convert from Fahrenheit to Celsius
         setMaxTemp(((weather.main.temp_max - 32) * 5) / 9);
@@ -54,14 +70,9 @@ export const Weather = () => {
   const handleUnitChange = () => {
     setUnit(unit === "celsius" ? "fahrenheit" : "celsius");
   };
-  console.log(weather);
-  console.log(Humidity);
+
   const currentDate = new Date().toDateString();
-  //   setDate(currentDate);
-  console.log(currentDate);
-  // console.log(new Date())
-  //   setDate(currentDate)
-  console.log(icon)
+
   return (
     <>
       <div className="m-5 flex  justify-center">
@@ -80,30 +91,14 @@ export const Weather = () => {
         <div className="flex flex-col bg-white rounded p-4 w-full max-w-xs">
           <div className="font-bold text-xl">{cityname}</div>
           <div className="text-sm text-gray-500">{currentDate}</div>
-          <div className="mt-6 text-6xl self-center inline-flex items-center justify-center rounded-lg text-indigo-400 h-24 w-24">
-            <svg
-              className="w-32 h-32"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Embedding the image link */}
-              <image
-                href={`https://openweathermap.org/img/wn/${icon}@2x.png`}
-                width="100%"
-                height="100%"
-                preserveAspectRatio="xMidYMid slice"
+          {icon && (
+            <div className="mt-6 text-6xl self-center inline-flex items-center justify-center rounded-lg text-indigo-400 h-24 w-24">
+              <img
+                src={`https://openweathermap.org/img/wn/${icon}@2x.png`}
+                alt="weather icon"
               />
-
-              {/* The path element you had before */}
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              ></path>
-            </svg>
-          </div>
+            </div>
+          )}
           <div className="text-center">{description}</div>
           <div className="flex flex-row items-center justify-center mt-6">
             <div className="font-medium text-6xl">
@@ -132,16 +127,20 @@ export const Weather = () => {
             <div className="flex flex-col items-center">
               <div className="font-medium text-sm">Wind</div>
               <div className="text-sm text-gray-500">
-                {(Wind * 3.6).toFixed(1)}km/h
+                {Wind !== null ? (Wind * 3.6).toFixed(1) : null}km/h
               </div>
             </div>
             <div className="flex flex-col items-center">
               <div className="font-medium text-sm">Humidity</div>
-              <div className="text-sm text-gray-500">{Humidity}%</div>
+              <div className="text-sm text-gray-500">
+                {Humidity !== null ? Humidity.toFixed(1) : null}%
+              </div>
             </div>
             <div className="flex flex-col items-center">
               <div className="font-medium text-sm">Visibility</div>
-              <div className="text-sm text-gray-500">{Visibility / 1000}km</div>
+              <div className="text-sm text-gray-500">
+                {Visibility !== null ? (Visibility / 1000).toFixed(1) : null}km
+              </div>
             </div>
           </div>
         </div>

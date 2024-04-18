@@ -1,4 +1,4 @@
-import { Search } from "./components/Search";
+
 import { TableWithSearch } from "./components/Table";
 import { Weather } from "./components/Weather";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";

@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from "react";
-import Autosuggest from "react-autosuggest";
+import React, { useState } from "react";
+import Autosuggest, { SuggestionsFetchRequestedParams } from "react-autosuggest";
 
-const SearchComponent = ({ data, onSearch }) => {
+interface SearchComponentProps {
+  data: { ascii_name: string }[];
+  onSearch: (searchTerm: string) => void;
+}
+
+const SearchComponent: React.FC<SearchComponentProps> = ({ data, onSearch }) => {
   const [search, setSearch] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<{ ascii_name: string }[]>([]);
 
-  const getSuggestions = (value) => {
+  const getSuggestions = (value: string) => {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
 
     return inputLength === 0
       ? []
-      : data.filter(
-          (dt) =>
-            dt.ascii_name.toLowerCase().slice(0, inputLength) === inputValue
-        );
+      : data.filter((dt) => dt.ascii_name.toLowerCase().slice(0, inputLength) === inputValue);
   };
 
-  const onSuggestionsFetchRequested = ({ value }) => {
+  const onSuggestionsFetchRequested = ({ value }: SuggestionsFetchRequestedParams) => {
     setSuggestions(getSuggestions(value));
   };
 
@@ -25,20 +27,21 @@ const SearchComponent = ({ data, onSearch }) => {
     setSuggestions([]);
   };
 
-  const getSuggestionValue = (suggestion) => suggestion.ascii_name;
+  const getSuggestionValue = (suggestion: { ascii_name: string }) => suggestion.ascii_name;
 
-  const renderSuggestion = (suggestion) => (
+  const renderSuggestion = (suggestion: { ascii_name: string }) => (
     <div className="text-left bg-slate-300 p-1 rounded-sm opacity-100 hover:bg-teal-400">
       {suggestion.ascii_name}
     </div>
   );
 
-  const onChange = (event, { newValue }) => {
-    setSearch(newValue);
+  const onChange = (event:any, { newValue }: { newValue: string }) => {
+    // console.log(event)
+    setSearch(event.target.value);
     onSearch(newValue);
   };
 
-  const onSuggestionSelected = (event, { suggestion }) => {
+  const onSuggestionSelected = (_: React.FormEvent, { suggestion }: { suggestion: { ascii_name: string } }) => {
     setSearch(suggestion.ascii_name);
     onSearch(suggestion.ascii_name);
   };
@@ -47,8 +50,7 @@ const SearchComponent = ({ data, onSearch }) => {
     placeholder: "Search for a city...",
     value: search,
     onChange: onChange,
-    className:
-      "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500",
+    className: "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500",
   };
 
   return (
@@ -61,9 +63,9 @@ const SearchComponent = ({ data, onSearch }) => {
         renderSuggestion={renderSuggestion}
         inputProps={inputProps}
         onSuggestionSelected={onSuggestionSelected}
-        className="absolute top-10 z-10 w-full border-2 border-blue-600 rounded-md"
       />
     </div>
   );
 };
+
 export default SearchComponent;

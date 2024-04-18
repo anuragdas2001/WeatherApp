@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import SearchComponent from "./Search";
 import { Link } from "react-router-dom";
-import { Outlet } from "react-router-dom";
-export const TableWithSearch = () => {
-  const [search, setSearch] = useState("");
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+import SearchComponent from "./Search";
+
+interface DataItem {
+  ascii_name: string;
+  cou_name_en: string;
+  timezone: string;
+}
+
+export const TableWithSearch: React.FC = () => {
+  const [search, setSearch] = useState<string>("");
+  const [data, setData] = useState<DataItem[]>([]);
+  const [filteredData, setFilteredData] = useState<DataItem[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,10 +38,10 @@ export const TableWithSearch = () => {
     );
   }, [search, data]);
 
-  const handleSearch = (searchTerm) => {
+  const handleSearch = (searchTerm: string) => {
     setSearch(searchTerm);
   };
-  console.log(data);
+
   return (
     <>
       <div className="container mx-auto p-4">
@@ -66,14 +72,12 @@ export const TableWithSearch = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {row.cou_name_en}
                 </td>
-
                 <td className="px-6 py-4 whitespace-nowrap">{row.timezone}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* <Outlet/> */}
     </>
   );
 };
